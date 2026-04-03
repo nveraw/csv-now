@@ -19,7 +19,6 @@ export default function SearchForm({ onSearch }: SearchFormProps) {
         onSubmit={(e) => {
           e.preventDefault();
           const value = searchElm.current?.value?.trim();
-          console.log(value);
           onSearch(value || "");
         }}
       >
@@ -31,6 +30,8 @@ export default function SearchForm({ onSearch }: SearchFormProps) {
             name="search"
             ref={searchElm}
             onKeyDown={handleKeyDown}
+            maxLength={100}
+            pattern="^[a-zA-Z0-9\s]*$"
           />
           <Button type="submit" bg="bg.subtle" variant="outline">
             Search

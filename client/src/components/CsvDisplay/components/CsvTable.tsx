@@ -1,12 +1,5 @@
+import type { Data } from "@/types/display";
 import { Table, Text } from "@chakra-ui/react";
-
-export type Data = {
-  postId: number;
-  id: number;
-  name: string;
-  email: string;
-  body: string;
-};
 
 export default function CsvTable({ data }: { data: Data[] }) {
   return (

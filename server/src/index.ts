@@ -25,6 +25,13 @@ app.get("/", (req, res) => {
   res.json({ status: "ok" });
 });
 
+app.get("/api/records", (req, res) => {
+  res.status(404).json({
+    success: false,
+    message: "Not ready",
+  });
+});
+
 if (process.env.NODE_ENV !== "production") {
   const PORT = process.env.PORT || 3001;
   app.listen(PORT, () => {
