@@ -3,7 +3,6 @@ import { useState } from "react";
 import CsvPagination from "./components/CsvPagination";
 import type { Data } from "./components/CsvTable";
 import CsvTable from "./components/CsvTable";
-import "./csvDisplay.css";
 
 const ROWS_PER_PAGE = 5;
 

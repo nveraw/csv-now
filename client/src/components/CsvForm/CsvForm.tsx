@@ -11,7 +11,6 @@ import {
 import { type SubmitEvent } from "react";
 import { HiUpload } from "react-icons/hi";
 import Loading from "../Loading/Loading";
-import "./csvform.css";
 
 export default function CsvForm() {
   const isFetching = false;
@@ -36,7 +35,7 @@ export default function CsvForm() {
   };
 
   return (
-    <Stack gap={2}>
+    <Stack gap={2} flex="1">
       {isFetching && (
         <Loading uploaded={60} total={100} label="Uploading data.csv" />
       )}

@@ -20,6 +20,7 @@ export default function CsvPagination({
       pageSize={ROWS_PER_PAGE}
       page={page}
       onPageChange={(e) => onPageChange(e.page)}
+      textAlign="center"
     >
       <ButtonGroup variant="ghost" size="sm" wrap="wrap">
         <Pagination.PrevTrigger asChild>

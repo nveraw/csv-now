@@ -1,4 +1,4 @@
-import { Table } from "@chakra-ui/react";
+import { Table, Text } from "@chakra-ui/react";
 
 export type Data = {
   postId: number;
@@ -28,7 +28,9 @@ export default function CsvTable({ data }: { data: Data[] }) {
               <td>{id}</td>
               <td>{name}</td>
               <td>{email}</td>
-              <td>{body}</td>
+              <td>
+                <Text whiteSpace="break-spaces">{body}</Text>
+              </td>
             </tr>
           ))}
         </tbody>

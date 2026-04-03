@@ -1,6 +1,5 @@
-import { Flex, Stack } from "@chakra-ui/react";
+import { Box, Flex, Stack } from "@chakra-ui/react";
 import { useState } from "react";
-import "./App.css";
 import CsvDisplay from "./components/CsvDisplay/CsvDisplay";
 import CsvForm from "./components/CsvForm/CsvForm";
 import SearchForm from "./components/SearchForm/SearchForm";
@@ -9,7 +8,7 @@ export default function App() {
   const [filterText, setFilterText] = useState("");
 
   return (
-    <main>
+    <Box display="flex" flexDirection="column" gap={3} p="4">
       <Stack gap={1}>
         <Flex gap={4} justify="space-between" alignItems="flex-start">
           <CsvForm />
@@ -17,6 +16,6 @@ export default function App() {
         </Flex>
       </Stack>
       <CsvDisplay filter={filterText} />
-    </main>
+    </Box>
   );
 }
