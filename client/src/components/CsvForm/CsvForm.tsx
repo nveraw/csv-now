@@ -1,16 +1,29 @@
-import { useState, type ChangeEvent, type SubmitEvent } from "react";
+import {
+  Button,
+  CloseButton,
+  FileUpload,
+  Group,
+  Input,
+  InputGroup,
+  Stack,
+  useFileUpload,
+} from "@chakra-ui/react";
+import { type SubmitEvent } from "react";
+import { HiUpload } from "react-icons/hi";
+import Loading from "../Loading/Loading";
+import "./csvform.css";
 
 export default function CsvForm() {
-  const [file, setFile] = useState<File | null>(null);
+  const isFetching = false;
 
-  const handleUpload = async (e: ChangeEvent<HTMLInputElement>) => {
-    const newFile = e.target.files?.[0];
-    if (!newFile) return;
-    setFile(newFile);
-  };
+  const fileUpload = useFileUpload({
+    maxFiles: 1,
+  });
 
   const handleSubmit = async (e: SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
+    const file = fileUpload.acceptedFiles.map((file) => file.name)[0];
+
     if (!file) return;
 
     const formData = new FormData();
@@ -23,9 +36,41 @@ export default function CsvForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <input type="file" accept=".csv" onChange={handleUpload} />
-      <button type="submit">Upload CSV</button>
-    </form>
+    <Stack gap={2}>
+      {isFetching && (
+        <Loading uploaded={60} total={100} label="Uploading data.csv" />
+      )}
+      <form onSubmit={handleSubmit}>
+        <Group attached w="full" maxW="sm">
+          <FileUpload.Root accept={["text/csv"]} gap="1" maxWidth="300px">
+            <FileUpload.HiddenInput />
+            <InputGroup
+              startElement={<HiUpload color={isFetching ? "gray" : "unset"} />}
+              endElement={
+                <FileUpload.ClearTrigger asChild>
+                  <CloseButton
+                    me="-1"
+                    size="xs"
+                    variant="plain"
+                    focusVisibleRing="inside"
+                    focusRingWidth="2px"
+                    pointerEvents="auto"
+                  />
+                </FileUpload.ClearTrigger>
+              }
+            >
+              <Input asChild>
+                <FileUpload.Trigger>
+                  <FileUpload.FileText lineClamp={1} />
+                </FileUpload.Trigger>
+              </Input>
+            </InputGroup>
+          </FileUpload.Root>
+          <Button bg="bg.subtle" variant="outline" type="submit">
+            Upload CSV
+          </Button>
+        </Group>
+      </form>
+    </Stack>
   );
 }
