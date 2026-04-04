@@ -1,6 +1,8 @@
+import { useConfirm } from "@/hooks/useConfirm";
 import { useUploadCsv } from "@/hooks/useUpload";
 import type { StoreState } from "@/store";
 import { reset } from "@/store/uploadSlice";
+import type { UploadOption } from "@/types/upload";
 import {
   Button,
   CloseButton,
@@ -14,16 +16,20 @@ import {
 import { useState, type SubmitEvent } from "react";
 import { HiUpload } from "react-icons/hi";
 import { useDispatch, useSelector } from "react-redux";
+import CsvError from "../CsvError/CsvError";
 import Loading from "../Loading/Loading";
-import { toaster } from "../ui/toaster";
 import DuplicateDialog from "./components/DuplicateDialog";
 
 export default function CsvForm() {
+  const dispatch = useDispatch();
+
   const progress = useSelector((state: StoreState) => state.upload.progress);
+  const isDone = useSelector((state: StoreState) => state.upload.isDone);
   const { uploaded, total } = progress || { uploaded: 0, total: 0 };
 
-  const dispatch = useDispatch();
   const { mutate, isPending, error, data } = useUploadCsv();
+  const confirm = useConfirm();
+
   const [fileName, setFilename] = useState("");
 
   const fileUpload = useFileUpload({
@@ -33,6 +39,7 @@ export default function CsvForm() {
 
   const handleSubmit = (e: SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (isPending) return;
     const file = fileUpload.acceptedFiles[0];
     if (!file) return;
     setFilename(file.name);
@@ -41,23 +48,21 @@ export default function CsvForm() {
     });
   };
 
-  if (error) {
-    toaster.create({
-      description: error.message,
-      type: "error",
-      closable: true,
-    });
-  }
+  const handleConfirm = (option: UploadOption) => {
+    if (confirm.isPending) return;
+    confirm.mutate(option);
+  };
 
   return (
     <Stack gap={2} flex="1">
-      {uploaded !== total && (
+      {uploaded !== total && !isDone && (
         <Loading
           label={`Uploading ${fileName}`}
           percent={(uploaded / total) * 100}
         />
       )}
-      <DuplicateDialog duplicate={data?.duplicate} />
+      <CsvError error={error || confirm.error} />
+      <DuplicateDialog duplicate={data?.duplicate} onConfirm={handleConfirm} />
       <form onSubmit={handleSubmit}>
         <Group attached w="full" maxW="sm">
           <FileUpload.RootProvider value={fileUpload}>
@@ -84,7 +89,12 @@ export default function CsvForm() {
               </Input>
             </InputGroup>
           </FileUpload.RootProvider>
-          <Button bg="bg.subtle" variant="outline" type="submit">
+          <Button
+            disabled={isPending}
+            bg="bg.subtle"
+            variant="outline"
+            type="submit"
+          >
             Upload CSV
           </Button>
         </Group>

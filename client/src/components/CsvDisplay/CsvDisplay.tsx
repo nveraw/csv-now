@@ -1,8 +1,8 @@
 import { useTable } from "@/hooks/useTable";
 import { Stack } from "@chakra-ui/react";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
+import CsvError from "../CsvError/CsvError";
 import Loading from "../Loading/Loading";
-import { Toaster, toaster } from "../ui/toaster";
 import CsvPagination from "./components/CsvPagination";
 import CsvTable from "./components/CsvTable";
 
@@ -20,27 +20,11 @@ export default function CsvDisplay({ filter }: { filter?: string }) {
     filter,
   });
   const { data, total } = response || {};
-  const toastRef = useRef<string>(null);
-
-  useEffect(() => {
-    const visible = toastRef.current
-      ? toaster.isVisible(toastRef.current || "")
-      : false;
-    if (visible || !error) {
-      return;
-    }
-
-    toastRef.current = toaster.create({
-      description: error.message,
-      type: "error",
-      closable: true,
-    });
-  }, [error]);
 
   return (
     <Stack width="full" gap="5">
       {isFetching && <Loading label="Fetching data..." />}
-      {error && <Toaster />}
+      <CsvError error={error} />
       {data && (
         <>
           <CsvTable
