@@ -1,4 +1,4 @@
-import type { Duplicate } from "@/types/upload";
+import type { Duplicate, UploadOption } from "@/types/upload";
 import {
   Button,
   CloseButton,
@@ -14,14 +14,23 @@ import DuplicateTable from "./DuplicateTable";
 
 type DuplicateDialogProps = {
   duplicate?: Duplicate;
+  onConfirm: (option: UploadOption) => void;
 };
 
-export default function DuplicateDialog({ duplicate }: DuplicateDialogProps) {
-  const [open, setOpen] = useState(!!duplicate);
+export default function DuplicateDialog({
+  duplicate,
+  onConfirm,
+}: DuplicateDialogProps) {
+  const [open, setOpen] = useState(true);
 
   if (!duplicate) {
     return null;
   }
+
+  const handleClick = (option: UploadOption) => {
+    setOpen(false);
+    onConfirm(option);
+  };
 
   return (
     <Dialog.Root
@@ -58,9 +67,15 @@ export default function DuplicateDialog({ duplicate }: DuplicateDialogProps) {
               <DuplicateTable data={duplicate?.sample} />
             </Dialog.Body>
             <Dialog.Footer>
-              <Button variant="outline">Insert & IGNORE duplicate</Button>
-              <Button>Insert & UPDATE duplicate</Button>
-              <Button colorPalette="red">Abort</Button>
+              <Button onClick={() => handleClick("ignore")} variant="outline">
+                Insert & IGNORE duplicate
+              </Button>
+              <Button onClick={() => handleClick("update")}>
+                Insert & UPDATE duplicate
+              </Button>
+              <Button onClick={() => handleClick("cancel")} colorPalette="red">
+                Cancel
+              </Button>
             </Dialog.Footer>
           </Dialog.Content>
         </Dialog.Positioner>
