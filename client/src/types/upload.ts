@@ -18,3 +18,5 @@ export type UploadState = {
   uploadError: string | null;
   isDone: boolean;
 };
+
+export type UploadOption = "ignore" | "update" | "cancel";
