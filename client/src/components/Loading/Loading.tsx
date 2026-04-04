@@ -1,9 +1,8 @@
 import { Box, Center, Progress } from "@chakra-ui/react";
 
-type LoadingProps = { label: string; uploaded?: number; total?: number };
+type LoadingProps = { label: string; percent?: number | null };
 
-export default function Loading({ label, uploaded, total }: LoadingProps) {
-  const value = uploaded && total ? (uploaded / total) * 100 : null;
+export default function Loading({ label, percent = null }: LoadingProps) {
   return (
     <Box
       position="fixed"
@@ -23,7 +22,7 @@ export default function Loading({ label, uploaded, total }: LoadingProps) {
             striped
             animated
             textAlign="right"
-            value={value}
+            value={percent}
           >
             <Progress.Label mb={4} w="full" textAlign="left">
               {label}
@@ -31,7 +30,7 @@ export default function Loading({ label, uploaded, total }: LoadingProps) {
             <Progress.Track mb={4}>
               <Progress.Range />
             </Progress.Track>
-            {!!value && <Progress.ValueText>{}%</Progress.ValueText>}
+            {!!percent && <Progress.ValueText>{percent}%</Progress.ValueText>}
           </Progress.Root>
         </Center>
       </Box>
