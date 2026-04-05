@@ -13,7 +13,7 @@ export const createWorker = (io: SocketServer) => {
       };
       await startWork(job.data, onEmit);
     },
-    { connection, concurrency: 3 },
+    { connection, concurrency: 1 },
   );
 
   worker.on("failed", (job, err) => {
