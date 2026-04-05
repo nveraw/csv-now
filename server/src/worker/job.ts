@@ -1,5 +1,6 @@
 import fs from "fs";
 import Papa from "papaparse";
+import { Server as SocketServer } from "socket.io";
 import { insertBatch } from "../libs/supabase";
 import { CsvData } from "../types";
 import { mapRow, transformHeader, validateHeader } from "../utils/csvProcess";
@@ -7,10 +8,7 @@ import { CsvJobData } from "./queue";
 
 const BATCH_SIZE = 10;
 
-export const startWork = async (
-  jobData: CsvJobData,
-  onEmit: (state: string, uploaded: number, total: number) => void,
-) => {
+export const startWork = async (jobData: CsvJobData, io: SocketServer) => {
   const { socketId, filePath, option, total } = jobData;
 
   console.log("worker start", socketId);
@@ -21,7 +19,6 @@ export const startWork = async (
   await new Promise<void>((resolve, reject) => {
     const stream = fs.createReadStream(filePath, "utf8");
     console.log("worker streaming", filePath);
-    onEmit("upload_progress", uploaded, total); // kick start
 
     let headerValidated = false;
     let headerMapRequired = false;
@@ -60,7 +57,11 @@ export const startWork = async (
               }
               uploaded += flushed.length;
 
-              onEmit("upload_progress", uploaded, total);
+              io.to(jobData.socketId).emit("upload_progress", {
+                uploaded,
+                total,
+              });
+              io.to("global").emit("new_rows", { rows: flushed });
               parser.resume();
             })
             .catch((err) => {
@@ -80,7 +81,8 @@ export const startWork = async (
           }
           uploaded += buffer.length;
         }
-        onEmit("upload_complete", uploaded, total);
+        io.to(jobData.socketId).emit("upload_complete", { uploaded, total });
+        io.to("global").emit("new_rows", { rows: buffer });
         await fs.promises.unlink(filePath);
         resolve();
       },

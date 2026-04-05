@@ -1,4 +1,4 @@
-import { useTable } from "@/hooks/useTable";
+import { useRecord } from "@/hooks/useRecord";
 import type { StoreState } from "@/store";
 import { reset } from "@/store/uploadSlice";
 import { Stack } from "@chakra-ui/react";
@@ -18,32 +18,32 @@ export default function CsvDisplay({ filter }: { filter?: string }) {
     error,
     isFetching,
     refetch,
-  } = useTable({
+  } = useRecord({
     page,
     pageSize: ROWS_PER_PAGE,
     filter,
   });
-  const { data, total } = response || {};
+  const { data, total = 0 } = response || {};
 
   const dispatch = useDispatch();
-  const isDone = useSelector((state: StoreState) => state.upload.isDone);
+  const newRows = useSelector((state: StoreState) => state.upload.newRows);
+  const displayData = filter?.length
+    ? data || []
+    : (data || []).concat(newRows);
 
   useEffect(() => {
-    if (isDone) {
-      refetch();
-      dispatch(reset());
-    }
-  }, [isDone, dispatch, refetch]);
+    refetch();
+    dispatch(reset());
+  }, [filter, dispatch, refetch]);
 
   return (
     <Stack width="full" gap="5">
-      {/* {isFetching && <Loading label="Fetching data..." />} */}
       <ErrorToast error={error} />
-      {data?.length ? (
+      {displayData.length ? (
         <>
-          <CsvTable data={data} />
+          <CsvTable data={displayData.slice(page - 1, ROWS_PER_PAGE)} />
           <CsvPagination
-            count={total || data.length}
+            count={newRows.length ? displayData.length : total}
             page={page}
             onPageChange={setPage}
             disabled={isFetching}

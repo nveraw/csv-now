@@ -1,3 +1,4 @@
+import type { Data } from "@/types/display";
 import type { Progress, UploadState } from "@/types/upload";
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 
@@ -6,6 +7,7 @@ const initialState: UploadState = {
   progress: null,
   uploadError: null,
   isDone: false,
+  newRows: [],
 };
 
 export const uploadSlice = createSlice({
@@ -31,9 +33,22 @@ export const uploadSlice = createSlice({
       state.id = null;
       state.isDone = true;
     },
+    appendRows: (state, action: PayloadAction<Data[]>) => {
+      const incomingIds = new Set(action.payload.map((r) => r.id));
+      state.newRows = [
+        ...action.payload,
+        ...state.newRows.filter((r) => !incomingIds.has(r.id)),
+      ];
+    },
     reset: () => initialState,
   },
 });
 
-export const { setUploadId, upload, uploadError, uploadComplete, reset } =
-  uploadSlice.actions;
+export const {
+  setUploadId,
+  upload,
+  uploadError,
+  appendRows,
+  uploadComplete,
+  reset,
+} = uploadSlice.actions;

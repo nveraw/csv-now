@@ -1,5 +1,11 @@
 import { getSocket } from "@/libs/socket";
-import { upload, uploadComplete, uploadError } from "@/store/uploadSlice";
+import {
+  appendRows,
+  upload,
+  uploadComplete,
+  uploadError,
+} from "@/store/uploadSlice";
+import type { Data } from "@/types/display";
 import type { Progress } from "@/types/upload";
 import { type ReactNode, useEffect } from "react";
 import { useDispatch } from "react-redux";
@@ -22,7 +28,10 @@ export function SocketProvider({ children }: { children: ReactNode }) {
     const onUploadError = ({ message }: { message: string }) =>
       dispatch(uploadError(message));
     const onError = (e: Error) => console.log("generic socket error", e);
+    const onNewRows = ({ rows }: { rows: Data[] }) =>
+      dispatch(appendRows(rows));
 
+    socket.on("new_rows", onNewRows);
     socket.on("connect", onConnect);
     socket.on("disconnect", onDisconnect);
     socket.io.on("reconnect_failed", onReconnectFail);
@@ -41,6 +50,7 @@ export function SocketProvider({ children }: { children: ReactNode }) {
       socket.off("upload_complete", onUploadComplete);
       socket.off("upload_error", onUploadError);
       socket.io.off("error", onError);
+      socket.off("new_rows", onNewRows);
     };
   }, [dispatch]);
 
