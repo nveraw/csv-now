@@ -5,7 +5,7 @@ import { Server } from "socket.io";
 import confirmRouter from "./routes/confirm";
 import recordRouter from "./routes/record";
 import uploadRouter from "./routes/upload";
-import { createWorker } from "./worker";
+import { createWorker } from "./worker/worker";
 
 const app = express();
 
@@ -14,7 +14,7 @@ const allowedOrigins = ["http://localhost:5173"];
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
+      if (origin && allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
         console.warn(`Blocked CORS request from: ${origin}`);

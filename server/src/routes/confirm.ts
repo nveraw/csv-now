@@ -1,7 +1,7 @@
 import express from "express";
 import fs from "fs";
 import { tempScanStore } from "../libs/scanStore";
-import { CsvJobData, csvQueue } from "../queue";
+import { CsvJobData, csvQueue } from "../worker/queue";
 
 const router = express.Router();
 
@@ -9,7 +9,6 @@ router.post("/:uploadId/confirm", async (req, res) => {
   try {
     const { option } = req.body;
     const { uploadId } = req.params;
-    console.error("confirm ERROR:", uploadId);
 
     const scan = tempScanStore.get(uploadId);
     if (!scan) {
@@ -45,6 +44,9 @@ router.post("/:uploadId/confirm", async (req, res) => {
     res.json({ uploadId });
   } catch (e) {
     console.error("confirm ERROR:", e);
+    res
+      .status(500)
+      .json({ error: "Unknown eror has occured. Try agian a moment later" });
   }
 });
 

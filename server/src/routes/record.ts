@@ -20,6 +20,9 @@ router.get("/records", async (req, res) => {
 
     res.json({ data, total: count, page, pageSize });
   } catch (e) {
+    res
+      .status(500)
+      .json({ error: "Unknown eror has occured. Try agian a moment later" });
     console.error("records ERROR:", e);
   }
 });

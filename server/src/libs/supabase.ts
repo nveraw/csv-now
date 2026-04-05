@@ -1,6 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
-import { CsvJobData } from "../queue";
 import { CsvData } from "../types";
+import { CsvJobData } from "../worker/queue";
 
 const supabase = createClient(
   process.env.SUPABASE_URL!,
@@ -37,11 +37,23 @@ export const getRecordsWithFilter = async (
   filter: string,
 ) => {
   const columns = ["name", "email", "body"];
-  const query = columns.join(`.ilike.*${filter}*,`) + `.ilike.*${filter}*`;
+  const keyword = filter.replace(/[^a-zA-Z0-9 @.-]/g, "");
+  const query = columns.join(`.ilike.*${keyword}*,`) + `.ilike.*${keyword}*`;
   console.log(query);
   return await supabase
     .from("csv_now")
-    .select("*", { count: "planned" })
+    .select("*", { count: "exact" })
     .or(query)
     .range(from, to);
+};
+
+const CHUNK_SIZE = 10_000;
+export const batchSelect = async (ids: number[]): Promise<CsvData[]> => {
+  const dataInDb: CsvData[] = [];
+  for (let i = 0; i < ids.length; i += CHUNK_SIZE) {
+    const chunk = ids.slice(i, i + CHUNK_SIZE);
+    const { data } = await getExisting(chunk);
+    dataInDb.push(...(data ?? []));
+  }
+  return dataInDb;
 };
