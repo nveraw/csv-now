@@ -24,9 +24,11 @@ export const uploadSlice = createSlice({
     },
     uploadError: (state, action: PayloadAction<string>) => {
       state.uploadError = action.payload;
+      state.id = null;
     },
     uploadComplete: (state, action: PayloadAction<Progress>) => {
       state.progress = action.payload;
+      state.id = null;
       state.isDone = true;
     },
     reset: () => initialState,

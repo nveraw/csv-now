@@ -1,5 +1,11 @@
 import cors from "cors";
 import express from "express";
+import { createServer } from "http";
+import { Server } from "socket.io";
+import confirmRouter from "./routes/confirm";
+import recordRouter from "./routes/record";
+import uploadRouter from "./routes/upload";
+import { createWorker } from "./worker";
 
 const app = express();
 
@@ -21,22 +27,33 @@ app.use(
 // Converts JSON from the request body into a JavaScript object you can access in req.body
 app.use(express.json());
 
+const httpServer = createServer(app);
+const io = new Server(httpServer, {
+  cors: {
+    origin: allowedOrigins,
+  },
+});
+
+io.on("connection", (socket) => {
+  socket.on("joinProcess", (socketId: string) => {
+    socket.join(socketId);
+  });
+});
+createWorker(io);
+
 app.get("/", (req, res) => {
   res.json({ status: "ok" });
 });
 
-app.get("/api/records", (req, res) => {
-  res.status(404).json({
-    success: false,
-    message: "Not ready",
-  });
-});
+app.use("/api", recordRouter);
+app.use("/api", uploadRouter);
+app.use("/api", confirmRouter);
 
-if (process.env.NODE_ENV !== "production") {
-  const PORT = process.env.PORT || 3001;
-  app.listen(PORT, () => {
-    console.log(`🚀 server running on http://localhost:${PORT}`);
-  });
-}
+const PORT = process.env.PORT || 3001;
+httpServer.listen(PORT, () => {
+  console.log(
+    `🚀 server running on ${process.env.NODE_ENV !== "production" ? "http://localhost:" : "port:"} ${PORT}`,
+  );
+});
 
 export default app;

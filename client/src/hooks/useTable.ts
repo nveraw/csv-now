@@ -1,7 +1,7 @@
 import type { TableResponse, UseTableParams } from "@/types/display";
 import { useQuery } from "@tanstack/react-query";
 
-export function useTable({ page, pageSize = 50, filter = "" }: UseTableParams) {
+export function useTable({ page, pageSize = 10, filter = "" }: UseTableParams) {
   return useQuery<TableResponse>({
     queryKey: ["display", page, pageSize, filter],
     queryFn: async () => {
@@ -21,12 +21,11 @@ export function useTable({ page, pageSize = 50, filter = "" }: UseTableParams) {
       const res = await fetch(
         `${import.meta.env.VITE_API_URL}/api/records?${params}`,
       );
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message);
-      return res.json();
+      if (!res.ok) throw new Error(await res.text());
+      return await res.json();
     },
     placeholderData: (prev) => prev,
-    staleTime: 30_000,
     retry: false,
+    staleTime: Infinity,
   });
 }

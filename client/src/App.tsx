@@ -31,7 +31,14 @@ export default function App() {
   }, [reconnectFailed]);
 
   return (
-    <Box display="flex" flexDirection="column" gap={3} p="4">
+    <Box
+      display="flex"
+      flexDirection="column"
+      gap={3}
+      py="10"
+      maxW="800px"
+      mx="auto"
+    >
       {reconnectFailed && <Toaster />}
       <Stack gap={1}>
         <Flex gap={4} justify="space-between" alignItems="flex-start">

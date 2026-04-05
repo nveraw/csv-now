@@ -1,5 +1,6 @@
 import type { Duplicate } from "@/types/upload";
 import { Table, Text } from "@chakra-ui/react";
+import dompurify from "dompurify";
 import { Fragment } from "react";
 
 type DuplicateTableProps = {
@@ -33,19 +34,19 @@ export default function DuplicateTable({ data }: DuplicateTableProps) {
               <Table.Row>
                 <Table.Cell>{each.old.postId}</Table.Cell>
                 <Table.Cell>{each.old.id}</Table.Cell>
-                <Table.Cell>{each.old.name}</Table.Cell>
-                <Table.Cell>{each.old.email}</Table.Cell>
-                <Table.Cell whiteSpace="break-spaces">
-                  {each.old.body}
+                <Table.Cell whiteSpace="pre-line">{each.old.name}</Table.Cell>
+                <Table.Cell whiteSpace="pre-line">{each.old.email}</Table.Cell>
+                <Table.Cell whiteSpace="pre-line">
+                  {dompurify.sanitize(each.old.body).split("\\n").join("\n")}
                 </Table.Cell>
               </Table.Row>
               <Table.Row bg="gray.100">
                 <Table.Cell>{each.new.postId}</Table.Cell>
                 <Table.Cell>{each.new.id}</Table.Cell>
-                <Table.Cell>{each.new.name}</Table.Cell>
-                <Table.Cell>{each.new.email}</Table.Cell>
-                <Table.Cell whiteSpace="break-spaces">
-                  {each.new.body}
+                <Table.Cell whiteSpace="pre-line">{each.new.name}</Table.Cell>
+                <Table.Cell whiteSpace="pre-line">{each.new.email}</Table.Cell>
+                <Table.Cell whiteSpace="pre-line">
+                  {dompurify.sanitize(each.new.body).split("\\n").join("\n")}
                 </Table.Cell>
               </Table.Row>
             </Fragment>

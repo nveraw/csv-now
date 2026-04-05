@@ -31,7 +31,7 @@ export function SocketProvider({ children }: { children: ReactNode }) {
     socket.on("upload_error", onUploadError);
     socket.io.on("error", onError);
 
-    if (socket.connected) onConnect();
+    socket.connect();
 
     return () => {
       socket.off("connect", onConnect);

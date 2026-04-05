@@ -8,7 +8,7 @@ import {
   Separator,
   Text,
 } from "@chakra-ui/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PiWarningLight } from "react-icons/pi";
 import DuplicateTable from "./DuplicateTable";
 
@@ -23,14 +23,21 @@ export default function DuplicateDialog({
 }: DuplicateDialogProps) {
   const [open, setOpen] = useState(true);
 
-  if (!duplicate) {
-    return null;
-  }
+  // fix chakra-ui error
+  useEffect(() => {
+    if (!open) {
+      document.body.style = "";
+    }
+  }, [open]);
 
   const handleClick = (option: UploadOption) => {
     setOpen(false);
     onConfirm(option);
   };
+
+  if (!duplicate) {
+    return null;
+  }
 
   return (
     <Dialog.Root
@@ -47,7 +54,7 @@ export default function DuplicateDialog({
               <CloseButton />
             </Dialog.CloseTrigger>
             <Dialog.Header>
-              <Dialog.Title>
+              <Dialog.Title display="flex" alignItems="center" gap={2}>
                 <PiWarningLight color="red" /> ID(s) Exist!
               </Dialog.Title>
             </Dialog.Header>
@@ -64,7 +71,7 @@ export default function DuplicateDialog({
                 existed.
               </HStack>
               <Separator />
-              <DuplicateTable data={duplicate?.sample} />
+              {duplicate && <DuplicateTable data={duplicate?.sample} />}
             </Dialog.Body>
             <Dialog.Footer>
               <Button onClick={() => handleClick("ignore")} variant="outline">

@@ -1,11 +1,11 @@
 import { useEffect, useRef } from "react";
 import { Toaster, toaster } from "../ui/toaster";
 
-type CsvErrorProps = {
+type ErrorToastProps = {
   error?: Error | null;
 };
 
-export default function CsvError({ error }: CsvErrorProps) {
+export default function ErrorToast({ error }: ErrorToastProps) {
   const toastRef = useRef<string>(null);
 
   useEffect(() => {
