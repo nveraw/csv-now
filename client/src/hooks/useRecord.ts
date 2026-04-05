@@ -1,7 +1,11 @@
 import type { TableResponse, UseTableParams } from "@/types/display";
 import { useQuery } from "@tanstack/react-query";
 
-export function useTable({ page, pageSize = 10, filter = "" }: UseTableParams) {
+export function useRecord({
+  page,
+  pageSize = 10,
+  filter = "",
+}: UseTableParams) {
   return useQuery<TableResponse>({
     queryKey: ["display", page, pageSize, filter],
     queryFn: async () => {

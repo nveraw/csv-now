@@ -1,3 +1,4 @@
+import { ROWS_PER_PAGE } from "@/constant";
 import { ButtonGroup, IconButton, Pagination } from "@chakra-ui/react";
 import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
 
@@ -7,8 +8,6 @@ type CsvPaginationProps = {
   disabled: boolean;
   onPageChange: (page: number) => void;
 };
-
-const ROWS_PER_PAGE = 5;
 
 export default function CsvPagination({
   count,

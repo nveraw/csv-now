@@ -6,7 +6,7 @@ const mockUnlink = vi.fn();
 vi.mock("fs", async (importOriginal) => ({
   ...(await importOriginal()),
   default: {
-    createReadStream: vi.fn().mockReturnValue({ pipe: vi.fn() }), // ← return a fake stream
+    createReadStream: vi.fn().mockReturnValue({ pipe: vi.fn() }),
     promises: {
       unlink: vi.fn((...arg) => mockUnlink(...arg)),
     },
@@ -47,7 +47,13 @@ const mockJob = (overrides: Partial<CsvJobData> = {}): CsvJobData => ({
   uploadId: "testId",
   ...overrides,
 });
+
 const mockEmit = vi.fn();
+const mockIo: any = {
+  to: vi.fn((to) => ({
+    emit: mockEmit,
+  })),
+};
 
 describe("worker job", () => {
   beforeEach(() => {
@@ -61,10 +67,15 @@ describe("worker job", () => {
       opts.step(makeRow(2), mockParse);
       opts.complete();
     });
-    await startWork(mockJob(), mockEmit);
+    await startWork(mockJob(), mockIo);
 
-    expect(mockEmit).toHaveBeenNthCalledWith(1, "upload_progress", 0, 2);
-    expect(mockEmit).toHaveBeenLastCalledWith("upload_complete", 2, 2);
+    expect(mockEmit).toHaveBeenNthCalledWith(1, "upload_complete", {
+      uploaded: 2,
+      total: 2,
+    });
+    expect(mockEmit).toHaveBeenLastCalledWith("new_rows", {
+      rows: [makeRow(1).data, makeRow(2).data],
+    });
     expect(mockUnlink).toHaveBeenCalledWith("/test/test.csv");
   });
 
@@ -73,7 +84,7 @@ describe("worker job", () => {
       opts.step(makeRow(1), mockParse);
       opts.complete();
     });
-    await startWork(mockJob(), mockEmit);
+    await startWork(mockJob(), mockIo);
 
     expect(mockInsertBatch).toHaveBeenCalledOnce();
     expect(mockInsertBatch).toHaveBeenCalledWith(
@@ -89,10 +100,9 @@ describe("worker job", () => {
       opts.complete();
     });
 
-    await startWork(mockJob({ total: 11 }), mockEmit);
+    await startWork(mockJob({ total: 11 }), mockIo);
 
     expect(mockInsertBatch).toHaveBeenCalledTimes(2);
-    // first call: 10 rows, second call: 1 row
     expect(mockInsertBatch).toHaveBeenNthCalledWith(
       1,
       expect.arrayContaining([expect.objectContaining({ id: "1" })]),
@@ -103,7 +113,10 @@ describe("worker job", () => {
       expect.arrayContaining([expect.objectContaining({ id: "11" })]),
       "upsert",
     );
-    expect(mockEmit).toHaveBeenCalledWith("upload_complete", 11, 11);
+    expect(mockEmit).toHaveBeenCalledWith("upload_complete", {
+      uploaded: 11,
+      total: 11,
+    });
   });
 
   it("map header correctly", async () => {
@@ -124,7 +137,7 @@ describe("worker job", () => {
       opts.complete();
     });
 
-    await startWork(mockJob(), mockEmit);
+    await startWork(mockJob(), mockIo);
 
     const inserted = vi.mocked(mockInsertBatch).mock.calls[0][0];
     expect(inserted[0]).not.toHaveProperty("extraCol");
@@ -133,7 +146,6 @@ describe("worker job", () => {
 
   it("reject when csv missing header", async () => {
     papaMock = vi.fn((_stream, opts) => {
-      // missing postId, name, body
       opts.step(
         { data: { id: "1", email: "e@x.com" } },
         { pause: vi.fn(), resume: vi.fn(), abort: vi.fn() },
@@ -141,7 +153,7 @@ describe("worker job", () => {
       opts.complete();
     });
 
-    await expect(startWork(mockJob(), mockEmit)).rejects.toThrow(
+    await expect(startWork(mockJob(), mockIo)).rejects.toThrow(
       "Missing required columns: postId, name, body",
     );
   });
@@ -149,7 +161,6 @@ describe("worker job", () => {
   it("reject and abort when insertBatch error", async () => {
     const parser = { pause: vi.fn(), resume: vi.fn(), abort: vi.fn() };
     papaMock = vi.fn((_stream, opts) => {
-      // send 10 rows to trigger a mid-stream batch flush
       for (let i = 1; i <= 10; i++) opts.step(makeRow(i), parser);
       opts.complete();
     });
@@ -157,7 +168,7 @@ describe("worker job", () => {
       error: new Error("DB write failed"),
     });
 
-    await expect(startWork(mockJob({ total: 10 }), mockEmit)).rejects.toThrow(
+    await expect(startWork(mockJob({ total: 10 }), mockIo)).rejects.toThrow(
       "DB write failed",
     );
     expect(parser.abort).toHaveBeenCalled();
@@ -176,7 +187,7 @@ describe("worker job", () => {
       error: new Error("flush failed"),
     } as any);
 
-    await expect(startWork(mockJob({ total: 1 }), mockEmit)).rejects.toThrow(
+    await expect(startWork(mockJob({ total: 1 }), mockIo)).rejects.toThrow(
       "flush failed",
     );
   });
@@ -186,7 +197,7 @@ describe("worker job", () => {
       opts.error(new Error("stream corrupted"));
     });
 
-    await expect(startWork(mockJob({ total: 1 }), mockEmit)).rejects.toThrow(
+    await expect(startWork(mockJob({ total: 1 }), mockIo)).rejects.toThrow(
       "stream corrupted",
     );
   });

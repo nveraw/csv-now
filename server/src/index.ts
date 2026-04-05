@@ -35,6 +35,7 @@ const io = new Server(httpServer, {
 });
 
 io.on("connection", (socket) => {
+  socket.join("global");
   socket.on("joinProcess", (socketId: string) => {
     socket.join(socketId);
   });

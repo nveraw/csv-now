@@ -17,6 +17,7 @@ export type UploadState = {
   progress: Progress | null;
   uploadError: string | null;
   isDone: boolean;
+  newRows: Data[];
 };
 
 export type UploadOption = "ignore" | "update" | "cancel";

@@ -46,7 +46,7 @@ export default function App() {
           <SearchForm onSearch={setFilterText} />
         </Flex>
       </Stack>
-      <CsvDisplay filter={filterText} />
+      <CsvDisplay key={filterText} filter={filterText} />
     </Box>
   );
 }

@@ -8,12 +8,9 @@ export const createWorker = (io: SocketServer) => {
   const worker = new Worker<CsvJobData>(
     "csv-queue",
     async (job: Job<CsvJobData>) => {
-      const onEmit = (state: string, uploaded: number, total: number) => {
-        io.to(job.data.socketId).emit(state, { uploaded, total });
-      };
-      await startWork(job.data, onEmit);
+      await startWork(job.data, io);
     },
-    { connection, concurrency: 3 },
+    { connection, concurrency: 1 },
   );
 
   worker.on("failed", (job, err) => {
