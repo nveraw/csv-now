@@ -1,5 +1,6 @@
 import { useRecord } from "@/hooks/useRecord";
 import type { StoreState } from "@/store";
+import { reset } from "@/store/uploadSlice";
 import { Stack } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -26,22 +27,21 @@ export default function CsvDisplay({ filter }: { filter?: string }) {
 
   const dispatch = useDispatch();
   const newRows = useSelector((state: StoreState) => state.upload.newRows);
-  const isDone = useSelector((state: StoreState) => state.upload.isDone);
-  const displayData = (data || []).concat(newRows);
+  const displayData = filter?.length
+    ? data || []
+    : (data || []).concat(newRows);
 
   useEffect(() => {
-    if (isDone) {
-      // refetch();
-      // dispatch(reset());
-    }
-  }, [isDone, dispatch, refetch]);
+    refetch();
+    dispatch(reset());
+  }, [filter, dispatch, refetch]);
 
   return (
     <Stack width="full" gap="5">
       <ErrorToast error={error} />
       {displayData.length ? (
         <>
-          <CsvTable data={displayData.slice(0, ROWS_PER_PAGE)} />
+          <CsvTable data={displayData.slice(page - 1, ROWS_PER_PAGE)} />
           <CsvPagination
             count={newRows.length ? displayData.length : total}
             page={page}
