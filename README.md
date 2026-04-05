@@ -1,5 +1,7 @@
 # csv-now
 
+[c5ba624b-6fb1-4816-8576-81a1a6b58e7c.webm](https://github.com/user-attachments/assets/8cebcee7-5477-436e-9bd9-e5b7186c61ee)
+
 ## How it works
 
 1. **Upload** — select a `.csv` file and submit.
